@@ -80,8 +80,7 @@ fn get_file_size(data http.Response) int {
 		}
 		if x.str() == '\n' {
 			n = ''
-		}
-		else {		return '$result GB'
+		}else {
 			n += x.str()
 		}
 	}
@@ -155,11 +154,11 @@ fn bytes_to_mb(bytes int) string {
 	(не знал как сформулировать)*/
 	mut result := bytes / 1048576
 	if result > 0 { // MB
-		return '$result\.${result % 1048576} MB'
+		return '$result'+'.'+'${result % 1048576} MB'
 	}else if result >= 1024 { // GB
 		result = result / 1024
-		return '$result\.${result % 1024} GB'
+		return '$result'+'.'+'${result % 1024} GB'
 	}else { // KB
 		return '$bytes KB'
 	}
-} 
+}
