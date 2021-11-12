@@ -6,6 +6,7 @@
 
 import os
 import time
+import math
 import net.http
 
 import nedpals.vargs
@@ -32,9 +33,16 @@ fn main() {
 
 	url := parameter.unknown[0] // 'http://212.183.159.230/10MB.zip'
 	size := get_file_size(http.head(url)?)
-	file_name := get_file_name(url)
 	number_of_threads := parameter.options['x'].int()
-	println('File size $size bytes')
+	// FILE NAME
+	mut file_name := get_file_name(url)
+	if 'o' in parameter.options {
+		file_name = parameter.options['o']
+	}else if 'output' in parameter.options {
+		file_name = parameter.options['output']
+	}
+	/*-----------------------------------------*/
+	println('File size ${bytes_to_mb(size)} bytes')
 	if size > 1000000000 {
 		println('Файл слишком большой')
 		exit(1)
@@ -153,12 +161,14 @@ fn bytes_to_mb(bytes int) string {
 	/*Конвертирует байты в еденицы пригодные для чтения
 	(не знал как сформулировать)*/
 	mut result := bytes / 1048576
-	if result > 0 { // MB
-		return '$result'+'.'+'${result % 1048576} MB'
-	}else if result >= 1024 { // GB
+	if result >= 1024 {
 		result = result / 1024
 		return '$result'+'.'+'${result % 1024} GB'
-	}else { // KB
-		return '$bytes KB'
+	}else if result > 0 {
+		return '$result'+'.'+'${bytes / 1048576} MB'
+	}else if bytes / 1024 > 0 {
+		return '${bytes / 1024} KB'
+	}else {
+		return '${bytes} BYTES'
 	}
 }
