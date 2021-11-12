@@ -22,10 +22,7 @@ __global (
 
 
 fn main() {
-	result := avg_speed_calculate(600, 66000000)
-	println(result)
-	exit(0)
-
+	start := time.ticks()
 	mut parameter := vargs.new(os.args, 0)
 	parameter.parse()
 	// Если есть параметер h или help
@@ -70,6 +67,9 @@ fn main() {
 		}
 	}
 	f.close()
+	end := int(time.ticks() - start) / 1000
+	speed := avg_speed_calculate(end, size)
+	println('Average download speed $speed')
 }
 
 fn get_file_size(data http.Response) int {
