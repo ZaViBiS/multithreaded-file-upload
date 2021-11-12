@@ -3,8 +3,8 @@ import threading
 
 
 SIZE = 263089739
-HTRE = 1024
-URL = ''
+HTRE = 100
+URL = 'http://212.183.159.230/10MB.zip'
 file = {}
 
 
@@ -28,7 +28,6 @@ def th(num: int, heder: dict) -> None:
 
 def size_for_one(size: int, num_of_th: int) -> list:
     step = size // (num_of_th - 1)
-    n = 0
     result = []
     start = 0
     end = 0
@@ -36,7 +35,6 @@ def size_for_one(size: int, num_of_th: int) -> list:
         start = end
         end = start + step
         result.append(f'bytes={start}-{end-1}')
-        n += step
     result.append(f'bytes={end}-{size}')
     return result
 
