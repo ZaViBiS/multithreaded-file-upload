@@ -6,7 +6,6 @@
 
 import os
 import time
-import math
 import net.http
 
 import nedpals.vargs
@@ -23,6 +22,10 @@ __global (
 
 
 fn main() {
+	result := avg_speed_calculate(600, 66000000)
+	println(result)
+	exit(0)
+
 	mut parameter := vargs.new(os.args, 0)
 	parameter.parse()
 	// Если есть параметер h или help
@@ -171,4 +174,9 @@ fn bytes_to_mb(bytes int) string {
 	}else {
 		return '${bytes} BYTES'
 	}
+}
+
+fn avg_speed_calculate(time_sec int, size_bytes int) string {
+	/* Подсчёт средней скорости загрузки */
+	return bytes_to_mb(size_bytes / time_sec) + '/s'
 }
