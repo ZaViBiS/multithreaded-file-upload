@@ -130,7 +130,7 @@ fn download_stream(num int, interval string, url string, times int) {
 		if data.len != 0 {
 			break
 		}
-		time.sleep(sec_to_nanosec(1)) // 1 секунда
+		time.sleep(sec_to_nanosec(0.2)) // 0.2 секунда
 	}
 	if data.len == 0 {
 		// если не получилось
@@ -155,7 +155,7 @@ fn get_file_name(url string) string {
 	return ''
 }
 
-fn sec_to_nanosec(sec int) int { return sec * 1000000000 }
+fn sec_to_nanosec(sec f32) int { return int(sec * 1000000000.0) }
 
 fn bytes_to_mb(bytes int) string { 
 	/*Конвертирует байты в еденицы пригодные для чтения
