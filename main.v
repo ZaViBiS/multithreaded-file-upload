@@ -32,7 +32,11 @@ fn main() {
         println('./main -x [NUMBER OF THREADS] [URL]')
 		exit(0)
     }
-
+	// количесто повторений при возникновении ошибки
+	mut times := 100
+	if 't' in parameter.options { 
+		times = parameter.options['t'].int()
+	}
 	url := parameter.unknown[0] // 'http://212.183.159.230/10MB.zip'
 	size := get_file_size(http.head(url)?)
 	number_of_threads := parameter.options['x'].int()
@@ -53,7 +57,7 @@ fn main() {
 	one_size := size_for_one(size, number_of_threads)
 	mut n := 0
 	for inter in one_size {
-		threads << go download_stream(n, inter, url)
+		threads << go download_stream(n, inter, url, times)
 		n++
 	}
 	threads.wait()
@@ -136,15 +140,10 @@ fn size_for_one(size int, num_of_th int) []string {
 	return result
 }
 
-fn download_stream(num int, interval string, url string) {
+fn download_stream(num int, interval string, url string, times int) {
 	/*Скачисает свою часть файла и записывает в переменную (result_data)*/
 	// 10 попыток скачать
 	mut data := []byte {}
-	if 'i' in parameter.options { 
-		times := parameter.options['h'] 
-	}else { 
-		times:= 100 
-	}
 	for _ in 0..times {
 		data = resp(url, interval)
 		if data.len != 0 {
