@@ -76,6 +76,10 @@ fn main() {
 
 fn get_file_size(data http.Response) int {
 	// получает размер файла в bytes по url'у
+	if http.status_from_int(data.status_code).is_error() {
+		println('failed to get data from server with status code $data.status_code')
+		exit(1)
+	}
 	mut result := ''
 	mut n := ''
 	mut b := false
