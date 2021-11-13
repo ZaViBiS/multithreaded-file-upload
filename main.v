@@ -29,7 +29,7 @@ fn main() {
 	parameter.parse()
 	// Если есть параметер h или help
 	if 'h' in parameter.options || 'help' in parameter.options {
-        println('./main -x [NUMBER OF THREADS] [URL]')
+        println(config.help)
 		exit(0)
     }
 	// количесто повторений при возникновении ошибки

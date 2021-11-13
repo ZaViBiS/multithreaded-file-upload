@@ -19,3 +19,10 @@ pub const headers = [
 			,'Mozilla/5.0 (Windows; U; Windows NT 4.0) AppleWebKit/534.21.1 (KHTML, like Gecko) Version/5.0 Safari/534.21.1'
 			,'Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_8_1) AppleWebKit/5341 (KHTML, like Gecko) Chrome/36.0.845.0 Mobile Safari/5341', 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_2_1 like Mac OS X; sl-SI) AppleWebKit/534.37.4 (KHTML, like Gecko) Version/3.0.5 Mobile/8B114 Safari/6534.37.4', 'Mozilla/5.0 (X11; Linux x86_64; rv:6.0) Gecko/20121108 Firefox/37.0'
 			'Opera/9.58 (X11; Linux x86_64; sl-SI) Presto/2.10.171 Version/11.00']
+pub const help = '-x           количество потоков
+-t           количество повторений при ошибке (100)
+-h, --help   должна быть справка по утелите, но сейчас там только небольшой пример
+-o, --output имя выходного фала (если не указан будет азят из url\'а)
+-m           убрать ограничение на размер файла
+
+ofile -x [NUMBER OF THREADS] [URL]'
