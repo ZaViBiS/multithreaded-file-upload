@@ -101,7 +101,8 @@ fn get_file_size(data http.Response) int {
 			n += x.str()
 		}
 	}
-	return 0
+	println('something went wrong when receiving data from the server')
+	exit(1)
 }
 
 fn resp(url string, interval string) []byte {
