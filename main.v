@@ -140,7 +140,12 @@ fn download_stream(num int, interval string, url string) {
 	/*Скачисает свою часть файла и записывает в переменную (result_data)*/
 	// 10 попыток скачать
 	mut data := []byte {}
-	for _ in 0..100 {
+	if 'i' in parameter.options { 
+		times := parameter.options['h'] 
+	}else { 
+		times:= 100 
+	}
+	for _ in 0..times {
 		data = resp(url, interval)
 		if data.len != 0 {
 			break
