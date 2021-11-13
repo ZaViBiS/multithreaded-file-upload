@@ -6,9 +6,11 @@
 
 import os
 import time
+import rand
 import net.http
 
 import nedpals.vargs
+import config
 
 struct Data_struct {
 	num  int
@@ -100,10 +102,11 @@ fn get_file_size(data http.Response) int {
 
 fn resp(url string, interval string) []byte {
 	// Получает данные по url
-	config := http.FetchConfig{
+	http_config := http.FetchConfig{
         header: http.new_header(key: http.CommonHeader.range, value: interval)
+		user_agent: config.headers[rand.int_in_range(0, config.headers.len)]
     }
-	r := http.fetch(http.FetchConfig{ ...config, url: url }) or {
+	r := http.fetch(http.FetchConfig{ ...http_config, url: url }) or {
 		return ''.bytes() // не получилось скачать
 	}
 	return r.text.bytes()
