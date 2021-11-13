@@ -49,9 +49,11 @@ fn main() {
 	}
 	/*-----------------------------------------*/
 	println('file size ${bytes_to_mb(size)} bytes')
-	if size > 1000000000 {
-		println('Файл слишком большой')
-		exit(1)
+	if 'm' !in parameter.options {
+		if size > 1000000000 {
+			println('Файл слишком большой')
+			exit(1)
+		}
 	}
 	mut threads := []thread {}
 	one_size := size_for_one(size, number_of_threads)
