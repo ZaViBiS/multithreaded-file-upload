@@ -44,7 +44,7 @@ fn main() {
 		file_name = parameter.options['output']
 	}
 	/*-----------------------------------------*/
-	println('File size ${bytes_to_mb(size)} bytes')
+	println('file size ${bytes_to_mb(size)} bytes')
 	if size > 1000000000 {
 		println('Файл слишком большой')
 		exit(1)
@@ -71,7 +71,7 @@ fn main() {
 	f.close()
 	end := int(time.ticks() - start) / 1000
 	speed := avg_speed_calculate(end, size)
-	println('Average download speed $speed')
+	println('average download speed $speed')
 }
 
 fn get_file_size(data http.Response) int {
@@ -140,7 +140,7 @@ fn download_stream(num int, interval string, url string) {
 	/*Скачисает свою часть файла и записывает в переменную (result_data)*/
 	// 10 попыток скачать
 	mut data := []byte {}
-	for _ in 0..50 {
+	for _ in 0..100 {
 		data = resp(url, interval)
 		if data.len != 0 {
 			break
@@ -152,7 +152,7 @@ fn download_stream(num int, interval string, url string) {
 		println('failed to get data from server in thread $num')
 		exit(1)
 	}
-	println('Stream number ${num+1} completed with ${bytes_to_mb(data.len)} download')
+	println('stream number ${num+1} completed with ${bytes_to_mb(data.len)} download')
 	result_data << Data_struct{num, data}
 }
 
