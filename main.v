@@ -109,7 +109,11 @@ fn resp(url string, interval string) []byte {
 	r := http.fetch(http.FetchConfig{ ...http_config, url: url }) or {
 		return ''.bytes() // не получилось скачать
 	}
-	return r.text.bytes()
+	if http.status_from_int(r.status_code).is_success() {
+		/* Вернёт данные только если ответ будет "успешным" */
+		return r.text.bytes()
+	}
+	return ''.bytes() // не получилось скачать
 }
 
 fn size_for_one(size int, num_of_th int) []string {
