@@ -26,3 +26,4 @@ pub const help = '-x           количество потоков
 -m           убрать ограничение на размер файла
 
 ofile -x [NUMBER OF THREADS] [URL]'
+pub const version = '0.6'

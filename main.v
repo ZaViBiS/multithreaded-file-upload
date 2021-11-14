@@ -35,6 +35,11 @@ fn main() {
         println(config.help)
 		exit(0)
     }
+	// если есть параметер v или version
+	if 'v' in parameter.options || 'version' in parameter.options {
+        println(config.version)
+		exit(0)
+    }
 	// количесто повторений при возникновении ошибки
 	mut times := 100
 	if 't' in parameter.options { 
