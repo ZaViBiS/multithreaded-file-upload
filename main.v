@@ -11,6 +11,7 @@ import net.http
 
 import nedpals.vargs
 import config
+import progressbar
 
 struct Data_struct {
 	num  int
@@ -20,6 +21,8 @@ type ObjectSumType = Data_struct
 
 __global (
 	result_data = []ObjectSumType {}
+	sattt = []int {}
+	indecator = false
 )
 
 
@@ -58,11 +61,13 @@ fn main() {
 	mut threads := []thread {}
 	one_size := size_for_one(size, number_of_threads)
 	mut n := 0
+	go status_go(file_name, number_of_threads)
 	for inter in one_size {
 		threads << go download_stream(n, inter, url, times)
 		n++
 	}
 	threads.wait()
+	indecator = true
 	mut f := os.create(file_name) or {
         println(err)
         return
@@ -77,7 +82,8 @@ fn main() {
 	f.close()
 	end := int(time.ticks() - start) / 1000
 	speed := avg_speed_calculate(end, size)
-	println('average download speed $speed')
+	// println('average download speed $speed')
+	// bar.finish()
 }
 
 fn get_file_size(data http.Response) int {
@@ -137,8 +143,9 @@ fn download_stream(num int, interval string, url string, times int) {
 		println('failed to get data from server in thread $num')
 		exit(1)
 	}
-	println('stream number ${num+1} completed with ${bytes_to_mb(data.len)} download')
+	// println('stream number ${num+1} completed with ${bytes_to_mb(data.len)} download')
 	result_data << Data_struct{num, data}
+	sattt << 1 // bar.increment()
 }
 
 fn get_file_name(url string) string {
@@ -175,4 +182,19 @@ fn bytes_to_mb(bytes int) string {
 fn avg_speed_calculate(time_sec int, size_bytes int) string {
 	/* Подсчёт средней скорости загрузки */
 	return bytes_to_mb(size_bytes / time_sec) + '/s'
+}
+
+fn status_go(file_name string, max int) {
+	/* если в списке sattt поевляется что-то bar добовляет один и удаяет первый элемент */
+	mut bar := progressbar.Progressbar{}
+	bar.new_with_format(file_name+'     ', u64(max), [`[`, `#`, `]`])
+	for true {
+		if sattt.len > 0 {
+			bar.increment()
+			sattt.pop()
+		}
+		if indecator { break }
+		time.sleep(1000000) // 1ms
+	}
+	bar.finish()
 }
