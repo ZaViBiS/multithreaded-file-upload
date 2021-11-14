@@ -60,11 +60,9 @@ fn main() {
 	}
 	mut threads := []thread {}
 	one_size := size_for_one(size, number_of_threads)
-	mut n := 0
 	go status_go(file_name, number_of_threads)
-	for inter in one_size {
+	for n, inter in one_size {
 		threads << go download_stream(n, inter, url, times)
-		n++
 	}
 	threads.wait()
 	indecator = true
@@ -82,8 +80,7 @@ fn main() {
 	f.close()
 	end := int(time.ticks() - start) / 1000
 	speed := avg_speed_calculate(end, size)
-	// println('average download speed $speed')
-	// bar.finish()
+	println('average download speed $speed')
 }
 
 fn get_file_size(data http.Response) int {
@@ -91,7 +88,8 @@ fn get_file_size(data http.Response) int {
 	if http.status_from_int(data.status_code).is_success() {
 		return data.header.values(http.CommonHeader.content_length)[0].int()
 	}else {
-		println('failed to get data from server with status code [$data.status_code]')
+		println('failed to get data from server 
+				with status code [$data.status_code]')
 		exit(1)
 	}
 }
@@ -128,7 +126,7 @@ fn size_for_one(size int, num_of_th int) []string {
 }
 
 fn download_stream(num int, interval string, url string, times int) {
-	/*Скачисает свою часть файла и записывает в переменную (result_data)*/
+	/* Скачисает свою часть файла и записывает в переменную (result_data) */
 	// 10 попыток скачать
 	mut data := []byte {}
 	for _ in 0..times {
@@ -143,14 +141,13 @@ fn download_stream(num int, interval string, url string, times int) {
 		println('failed to get data from server in thread $num')
 		exit(1)
 	}
-	// println('stream number ${num+1} completed with ${bytes_to_mb(data.len)} download')
 	result_data << Data_struct{num, data}
 	sattt << 1 // bar.increment()
 }
 
 fn get_file_name(url string) string {
-	/*Если ты понял эту функцию то ты просто гений
-	она имя добывает из url'а если шо*/
+	/* Если ты понял эту функцию то ты просто гений
+	она имя добывает из url'а если шо */
 	mut n := url.len
 	for _ in 0..url.len {
 		n--
@@ -165,8 +162,8 @@ fn get_file_name(url string) string {
 fn sec_to_nanosec(sec f32) int { return int(sec * 1000000000.0) }
 
 fn bytes_to_mb(bytes int) string { 
-	/*Конвертирует байты в еденицы пригодные для чтения
-	(не знал как сформулировать)*/
+	/* Конвертирует байты в еденицы пригодные для чтения
+	(не знал как сформулировать) */
 	mut result := bytes / 1048576
 	if result >= 1024 {
 		return '${f32(result) / 1000} GB'
@@ -181,7 +178,7 @@ fn bytes_to_mb(bytes int) string {
 
 fn avg_speed_calculate(time_sec int, size_bytes int) string {
 	/* Подсчёт средней скорости загрузки */
-	return bytes_to_mb(size_bytes / time_sec) + '/s'
+	return bytes_to_mb(int(f32(size_bytes) / f32(time_sec))) + '/s'
 }
 
 fn status_go(file_name string, max int) {
