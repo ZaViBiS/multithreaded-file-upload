@@ -48,10 +48,15 @@ fn main() {
 		times = parameter.options['t'].int()
 	}
 	// проверка наличия url'а
-	url := parameter.unknown[0] // 'http://212.183.159.230/10MB.zip'
+	mut url := parameter.unknown[0] // 'http://212.183.159.230/10MB.zip'
+	// если url'а нету то «поискать» его в параметре «m»
 	if url == '' {
-		println('url не указан')
-		exit(1)
+		if 'm' in parameter.options && parameter.options['m'] != '' {
+			url = parameter.options['m']
+		}else {
+			println('url не указан')
+			exit(1)
+		}
 	}
 	size := get_file_size(http.head(url)?)
 	number_of_threads := parameter.options['x'].int()
