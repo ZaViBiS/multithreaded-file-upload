@@ -1,6 +1,10 @@
+import progressbar as p
+
 fn main() {
-	test := [1, 2, 3, 4, 5, 6, 7, 8, 9]
-	for x, y in test {
-		println('x-$x|y-$y')
+	mut bar := p.Progressbar{}
+	bar.new_with_format('test', u64(1024), [`[`, `#`, `]`])
+	for _ in 0..1024 {
+		bar.increment()
 	}
+	bar.finish()
 }

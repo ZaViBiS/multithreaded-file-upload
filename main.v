@@ -3,6 +3,7 @@
 (один поток скачевает меньше других так что можно сказать что n-1 потоков)
 Файлы больше 1 GB пока не поддерживаются
 */
+module main
 
 import os
 import time
@@ -11,6 +12,7 @@ import net.http
 
 import nedpals.vargs
 import config
+import util
 import progressbar
 
 struct Data_struct {
@@ -45,18 +47,23 @@ fn main() {
 	if 't' in parameter.options { 
 		times = parameter.options['t'].int()
 	}
+	// проверка наличия url'а
 	url := parameter.unknown[0] // 'http://212.183.159.230/10MB.zip'
+	if url == '' {
+		println('url не указан')
+		exit(1)
+	}
 	size := get_file_size(http.head(url)?)
 	number_of_threads := parameter.options['x'].int()
 	// FILE NAME
-	mut file_name := get_file_name(url)
+	mut file_name := util.get_file_name(url)
 	if 'o' in parameter.options {
 		file_name = parameter.options['o']
 	}else if 'output' in parameter.options {
 		file_name = parameter.options['output']
 	}
 	/*-----------------------------------------*/
-	println('file size ${bytes_to_mb(size)} bytes')
+	println('file size ${util.bytes_to_mb(size)} bytes')
 	if 'm' !in parameter.options {
 		if size > 1000000000 {
 			println('Файл слишком большой')
@@ -64,27 +71,27 @@ fn main() {
 		}
 	}
 	mut threads := []thread {}
-	one_size := size_for_one(size, number_of_threads)
+	one_size := util.size_for_one(size, number_of_threads)
 	go status_go(file_name, number_of_threads)
 	for n, inter in one_size {
 		threads << go download_stream(n, inter, url, times)
 	}
 	threads.wait()
 	indecator = true
-	mut f := os.create(file_name) or {
+	mut file := os.create(file_name) or {
         println(err)
         return
     }
 	for number in 0..number_of_threads {
 		for x in result_data {
 			if x.num == number {
-				f.write(x.data) or { println(err) }
+				file.write(x.data) or { println(err) }
 			}
 		}
 	}
-	f.close()
+	file.close()
 	end := int(time.ticks() - start) / 1000
-	speed := avg_speed_calculate(end, size)
+	speed := util.avg_speed_calculate(end, size)
 	println('average download speed $speed')
 }
 
@@ -115,21 +122,6 @@ fn resp(url string, interval string) []byte {
 	return ''.bytes() // не получилось скачать
 }
 
-fn size_for_one(size int, num_of_th int) []string {
-	// Делет файл на части (НЕ ФАКТИЧЕСКИ) для потоков
-	step := size / (num_of_th-1)
-    mut result := []string {}
-    mut start := 0
-    mut end := 0
-	for _ in 0..(num_of_th-1) {
-		start = end
-		end = start + step
-		result << 'bytes=$start-${end-1}'
-	}
-	result << 'bytes=$end-$size'
-	return result
-}
-
 fn download_stream(num int, interval string, url string, times int) {
 	/* Скачисает свою часть файла и записывает в переменную (result_data) */
 	// 10 попыток скачать
@@ -139,7 +131,7 @@ fn download_stream(num int, interval string, url string, times int) {
 		if data.len != 0 {
 			break
 		}
-		time.sleep(sec_to_nanosec(0.2)) // 0.2 секунда
+		time.sleep(util.sec_to_nanosec(0.2)) // 0.2 секунда
 	}
 	if data.len == 0 {
 		// если не получилось
@@ -148,42 +140,6 @@ fn download_stream(num int, interval string, url string, times int) {
 	}
 	result_data << Data_struct{num, data}
 	sattt << 1 // bar.increment()
-}
-
-fn get_file_name(url string) string {
-	/* Если ты понял эту функцию то ты просто гений
-	она имя добывает из url'а если шо */
-	mut n := url.len
-	for _ in 0..url.len {
-		n--
-		if url[n].ascii_str() == '/' {
-			n++
-			return url[n..url.len]
-		}
-	}
-	return ''
-}
-
-fn sec_to_nanosec(sec f32) int { return int(sec * 1000000000.0) }
-
-fn bytes_to_mb(bytes int) string { 
-	/* Конвертирует байты в еденицы пригодные для чтения
-	(не знал как сформулировать) */
-	mut result := bytes / 1048576
-	if result >= 1024 {
-		return '${f32(result) / 1000} GB'
-	}else if result > 0 {
-		return '${f32(bytes) / 1048576} MB'
-	}else if bytes / 1024 > 0 {
-		return '${bytes / 1024} KB'
-	}else {
-		return '${bytes} BYTES'
-	}
-}
-
-fn avg_speed_calculate(time_sec int, size_bytes int) string {
-	/* Подсчёт средней скорости загрузки */
-	return bytes_to_mb(int(f32(size_bytes) / f32(time_sec))) + '/s'
 }
 
 fn status_go(file_name string, max int) {
