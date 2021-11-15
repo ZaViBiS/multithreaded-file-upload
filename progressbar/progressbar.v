@@ -196,7 +196,7 @@ fn (p Progressbar) draw() {
 	printchar(p.end)
 
 	printchar(` `)
-	eta_format := 'ETA:$eta.hours\h/$eta.min\m/$eta.sec\s'//.substr(0, eta_format_length)
+	eta_format := 'ETA:${eta.hours}h/${eta.min}m/${eta.sec}s'//.substr(0, eta_format_length)
 	print(eta_format)
 }
 

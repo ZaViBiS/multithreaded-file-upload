@@ -10,7 +10,7 @@ pub fn bytes_to_mb(bytes int) string {
 	(не знал как сформулировать) */
 	mut result := bytes / 1048576
 	if result >= 1024 {
-		return '${f32(result) / 1000} GB'
+		return '${f32(result) / 1024} GB'
 	}else if result > 0 {
 		return '${f32(bytes) / 1048576} MB'
 	}else if bytes / 1024 > 0 {

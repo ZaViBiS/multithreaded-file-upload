@@ -25,3 +25,9 @@ fn test_size_for_one() {
 									 'bytes=60-69', 'bytes=70-79',
 									 'bytes=80-89', 'bytes=90-']
 }
+
+fn test_bytes_to_mb () {
+	assert bytes_to_mb(1024) == '1 KB'
+	assert bytes_to_mb(1048576*1024) == '1 GB'
+	assert bytes_to_mb(1048576) == '1 MB'
+}
