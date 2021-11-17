@@ -48,7 +48,7 @@ fn printchar(s byte) {
 
 const (
 	default_screen_width = 80
-	min_bar_width = 10
+	min_bar_width = 1
 	whitespace_length = 2
 	bar_border_width = 2
 	eta_format_length = 13
@@ -116,7 +116,7 @@ fn max (a int , b int) int {
 }
 
 fn progressbar_width(screen_width int, label_len int) int {
-	return 30 // max(min_bar_width, screen_width - label_len - eta_format_length - whitespace_length)
+	return  max(min_bar_width, screen_width - label_len - eta_format_length - whitespace_length)
 }
 
 fn progressbar_label_width (screen_width int, label_len int, bar_width int) int {

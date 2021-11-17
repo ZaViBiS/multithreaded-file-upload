@@ -34,10 +34,13 @@ fn test_bytes_to_mb () {
 
 fn test_stream_size_for_one() {
 	assert stream_size_for_one(1024, 12500) == ['bytes=12500-13524']
-	assert stream_size_for_one(8200, 12000) == ['bytes=12000-16095',
-												'bytes=16096-20200']
+	assert stream_size_for_one(8200, 0) == ['bytes=0-8200']
 }
 
 fn test_bytes_construct() {
 	assert bytes_construct(10, 10) == 'bytes=10-10'
+}
+
+fn test_size_and_interval_calculate() {
+	assert size_and_interval_calculate(8000, 3) == {}
 }

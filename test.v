@@ -1,13 +1,21 @@
-import time
+import os
+import rand
 
 fn main() {
-	mut th := []thread{}
-	for _ in 0..8000 {
-		th << go test()
+	mut a := true
+	if !a {
+		println(1)
 	}
-	th.wait()
+	a = false
+	if !a {
+		println(2)
+	}
 }
 
-fn test() {
-	time.sleep(20000000000)
+fn g(size int) []byte {
+	mut res := []byte{}
+	for _ in 0..size {
+		res << rand.byte()
+	}
+	return res
 }

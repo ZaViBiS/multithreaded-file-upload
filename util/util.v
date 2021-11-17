@@ -2,6 +2,13 @@ module util
 
 import os
 
+struct Size_for_one_th {
+	pub:
+		size int
+		interval int
+}
+type Sizze = Size_for_one_th
+
 pub fn avg_speed_calculate(time_sec int, size_bytes int) string {
 	/* Подсчёт скорости загрузки */
 	return bytes_to_mb(int(f32(size_bytes) / f32(time_sec))) + '/s'
@@ -54,6 +61,8 @@ pub fn size_for_one(size int, num_of_th int) []string {
 }
 
 pub fn stream_size_for_one(size int, interval_start int) []string {
+	/* получает количество байт для загрузки и начальный байт загрузки.
+	делет на части и возвращяет список с готовыми значениями для headers */
 	mut chunk := 1024*1024
 	if size < chunk {
 		chunk = size
@@ -73,15 +82,26 @@ pub fn stream_size_for_one(size int, interval_start int) []string {
 	return result
 }
 
-pub fn size_and_interval_calculate(file_size int, thread_num int) []int {
-	step := file_size / thread_num
-	mut res := []int {}
-	mut start := 0
-	for _ in 0..thread_num {
-		res << start
-		start += step
+pub fn size_and_interval_calculate(file_size int, thread_num int) []Sizze {
+	/* получает общий размер файла и количество потоков.
+	расчитывает части для потоков */
+	// step := file_size / thread_num
+	// mut res := []int {}
+	// mut start := 0
+	// res << 0
+	// for _ in 0..thread_num-1 {
+	// 	start += step
+	// 	res << start
+	// }
+	mut res := []Sizze {}
+	mut interval := 0
+	size := file_size / thread_num
+	for _ in 0..thread_num-1 {
+		res << Sizze{size, interval}
+		interval += size
 	}
-	res << file_size - start
+	res << Sizze{file_size-interval, interval}
+	// res << file_size
 	return res
 }
 

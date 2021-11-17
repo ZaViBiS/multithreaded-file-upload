@@ -14,19 +14,11 @@ import config
 import util
 import progressbar
 
-// struct Data_struct {
-// 	num  int
-// 	data []byte
-// }
-// type ObjectSumType = Data_struct
-
 __global (
-	// result_data = []util.ObjectSumType {}
 	sattt = []int {}
 	indecator = false
-	how = []string {len: 2, cap: 2, init: 'end'}
+	how = [0]
 )
-
 
 fn main() {
 	start := time.ticks()
@@ -53,12 +45,6 @@ fn main() {
 	if url == '' {
 		println('url не указан')
 		exit(1)
-		// if 'm' in parameter.options && parameter.options['m'] != '' {
-		// 	url = parameter.options['m']
-		// }else {
-		// 	println('url не указан')
-		// 	exit(1)
-		// }
 	}
 	size := get_file_size(http.head(url)?)
 	number_of_threads := parameter.options['x'].int()
@@ -70,33 +56,22 @@ fn main() {
 		file_name = parameter.options['output']
 	}
 	println('file size ${util.bytes_to_mb(size)} bytes')
-	// if 'm' !in parameter.options {
-	// 	if size > 3000000000 {
-	// 		println('Файл слишком большой')
-	// 		exit(1)
-	// 	}
+	// os.create(file_name) or {
+	// 	println(err)
+	// 	return
 	// }
-	os.create(file_name) or {
-		println(err)
-		return
-	}
 	mut threads := []thread {}
 	one_size := util.size_and_interval_calculate(size, number_of_threads)
 	mut chunk := 1024*1024
 	if size < chunk { chunk = size }
-	go status_go(file_name, size / chunk)
-	for n, inter in one_size {
-		threads << go download_stream(n, inter, one_size[1],
+	go status_go(file_name, size/chunk-1)
+	for n, size_n_interval in one_size {
+		threads << go download_stream(n, size_n_interval.interval, 
+									  size_n_interval.size,
 									  url, times, file_name)
 	}
 	threads.wait()
 	indecator = true
-	// for number in 0..number_of_threads {
-	// 	for x in result_data {
-	// 		if x.num == number {	
-	// 		}
-	// 	}
-	// }
 	end := int(time.ticks() - start) / 1000
 	speed := util.avg_speed_calculate(end, size)
 	println('\r\naverage download speed $speed')
@@ -107,8 +82,7 @@ fn get_file_size(data http.Response) int {
 	if http.status_from_int(data.status_code).is_success() {
 		return data.header.values(http.CommonHeader.content_length)[0].int()
 	}else {
-		println('failed to get data from server 
-				with status code [$data.status_code]')
+		println('failed to get data from server with status code [$data.status_code]')
 		exit(1)
 	}
 }
@@ -133,47 +107,70 @@ fn download_stream(stream_num int, interval_start int, size int,
 				   url string, times int, file_name string) {
 	/* Скачисает свою часть файла и записывает в переменную (result_data) */
 	// 100 попыток скачать
-	mut main_stream := false
-	mut data := []byte {}
-	// mut file := os.open_file
-	for interval in util.stream_size_for_one(size, interval_start) {
-		for _ in 0..times {
-		data << resp(url, interval)
-		if how.len != 0 && how[how.len-1] == 'end' {
-			if how[0].int() - 1 == stream_num {
-				how.clear()
-				how << '$stream_num'
-				main_stream = true
-			}
-		}
-		if main_stream {
-			mut file := os.open_append(file_name) or {
-				println(err)
-				return
-			}
-			file.write(data) or {println(err)}
-			file.close()
-			data = []byte
-		}
-		if data.len != 0 { break }
-		time.sleep(util.sec_to_nanosec(0.2)) // 0.2 секунда
-	}
-	sattt << 1
-	}
+// 	mut main_stream := false
+// 	mut data := []byte{}
+// 	for interval in util.stream_size_for_one(size, interval_start) {
+// 		for _ in 0..times {
+// 			data << resp(url, interval)
+// 			println(how)
+// 			if how.len != 0 && how.last() == 'end' && !main_stream {
+// 				if stream_num + how[0].int() == 0 {
+// 					how.clear()
+// 					how << '$stream_num'
+// 					main_stream = true
+// 				}
+				
+// 			}
+// 			if main_stream && data.len != 0 {
+// 				// mut file := os.open_append(file_name) or {
+// 				// 	println(err)
+// 				// 	return
+// 				// }
+// 				println(stream_num)
+// 				// file.write(data) or {println(err)}
+// 				// file.close()
+// 				os.write_file_array(file_name, data) or {
+// 					println(err)
+// 					return 
+// 				}
+// 				data.clear()
+// 				break
+// 			}
+// 			if data.len != 0 { break }
+// 			time.sleep(util.sec_to_nanosec(0.2)) // 0.2 секунда
+// 		}
+// 		sattt << 1
+// 	}
+// 	if data.len != 0 && !main_stream {
+// 		for true {
+// 			if how.len != 0 && how.last() == 'end' {
+// 				if how[0].int() + 1 == stream_num {
+// 					how.clear()
+// 					how << '$stream_num'
+// 					os.write_file_array(file_name, data) or {println(err)}
+// 					break
+// 				}
+// 			}
+// 		}
+// 	}
+// }
+
 }
 
 fn status_go(file_name string, max int) {
 	/* если в списке sattt поевляется что-то 
-	bar добовляет один и удаяет первый элемент */
+	bar добовляет один и удаяет первый элемент 
+	TODO: правильно расчитать размер*/
 	mut bar := progressbar.Progressbar{}
-	bar.new_with_format(file_name+'       ', u64(max), [`[`, `#`, `]`])
+	bar.new_with_format(file_name, u64(max), [`[`, `#`, `]`])
 	for true {
 		if sattt.len > 0 {
 			bar.increment()
 			sattt.pop()
+		}else {
+			if indecator { break }
 		}
-		if indecator { break }
-		time.sleep(100000000) // 100ms 
+		time.sleep(100000000) // 100ms
 	}
 	bar.finish()
 }
