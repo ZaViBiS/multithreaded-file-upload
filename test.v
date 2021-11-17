@@ -1,15 +1,13 @@
-import os
-import rand
+import time
 
 fn main() {
-	// mut file := os.open_append('ssdaasdasd')
-	os.write_file_array('ssdaasdasd', gen(1000*1000*10))?
+	mut th := []thread{}
+	for _ in 0..8000 {
+		th << go test()
+	}
+	th.wait()
 }
 
-fn gen(size int) []byte {
-	mut res := []byte{}
-	for _ in 0..size {
-		res << rand.byte()
-	}
-	return res
+fn test() {
+	time.sleep(20000000000)
 }

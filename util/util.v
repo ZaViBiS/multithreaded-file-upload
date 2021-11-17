@@ -54,7 +54,10 @@ pub fn size_for_one(size int, num_of_th int) []string {
 }
 
 pub fn stream_size_for_one(size int, interval_start int) []string {
-	chunk := size / 5 // 4096
+	mut chunk := 1024*1024
+	if size < chunk {
+		chunk = size
+	}
 	if size < chunk || size / chunk < 2 {
 		return [bytes_construct(interval_start, interval_start+size)] 
 	}

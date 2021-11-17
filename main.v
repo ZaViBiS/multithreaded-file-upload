@@ -82,7 +82,9 @@ fn main() {
 	}
 	mut threads := []thread {}
 	one_size := util.size_and_interval_calculate(size, number_of_threads)
-	go status_go(file_name, number_of_threads * 5)
+	mut chunk := 1024*1024
+	if size < chunk { chunk = size }
+	go status_go(file_name, size / chunk)
 	for n, inter in one_size {
 		threads << go download_stream(n, inter, one_size[1],
 									  url, times, file_name)
@@ -97,7 +99,7 @@ fn main() {
 	// }
 	end := int(time.ticks() - start) / 1000
 	speed := util.avg_speed_calculate(end, size)
-	println('average download speed $speed')
+	println('\r\naverage download speed $speed')
 }
 
 fn get_file_size(data http.Response) int {
@@ -164,14 +166,14 @@ fn status_go(file_name string, max int) {
 	/* если в списке sattt поевляется что-то 
 	bar добовляет один и удаяет первый элемент */
 	mut bar := progressbar.Progressbar{}
-	bar.new_with_format(file_name, u64(max), [`[`, `#`, `]`])
+	bar.new_with_format(file_name+'       ', u64(max), [`[`, `#`, `]`])
 	for true {
 		if sattt.len > 0 {
 			bar.increment()
 			sattt.pop()
 		}
 		if indecator { break }
-		time.sleep(100000000) // 1ms 
+		time.sleep(100000000) // 100ms 
 	}
 	bar.finish()
 }
