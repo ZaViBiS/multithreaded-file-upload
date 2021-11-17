@@ -31,3 +31,13 @@ fn test_bytes_to_mb () {
 	assert bytes_to_mb(1048576*1024) == '1 GB'
 	assert bytes_to_mb(1048576) == '1 MB'
 }
+
+fn test_stream_size_for_one() {
+	assert stream_size_for_one(1024, 12500) == ['bytes=12500-13524']
+	assert stream_size_for_one(8200, 12000) == ['bytes=12000-16095',
+												'bytes=16096-20200']
+}
+
+fn test_bytes_construct() {
+	assert bytes_construct(10, 10) == 'bytes=10-10'
+}

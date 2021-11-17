@@ -1,7 +1,6 @@
 /*
 Это программа загружает файл по url'у в n-е количесто потоков
 (один поток скачевает меньше других так что можно сказать что n-1 потоков)
-Файлы больше 1 GB пока не поддерживаются
 */
 module main
 
@@ -15,16 +14,17 @@ import config
 import util
 import progressbar
 
-struct Data_struct {
-	num  int
-	data []byte
-}
-type ObjectSumType = Data_struct
+// struct Data_struct {
+// 	num  int
+// 	data []byte
+// }
+// type ObjectSumType = Data_struct
 
 __global (
-	result_data = []ObjectSumType {}
+	// result_data = []util.ObjectSumType {}
 	sattt = []int {}
 	indecator = false
+	how = []string {len: 2, cap: 2, init: 'end'}
 )
 
 
@@ -51,12 +51,14 @@ fn main() {
 	mut url := parameter.unknown[0] // 'http://212.183.159.230/10MB.zip'
 	// если url'а нету то «поискать» его в параметре «m»
 	if url == '' {
-		if 'm' in parameter.options && parameter.options['m'] != '' {
-			url = parameter.options['m']
-		}else {
-			println('url не указан')
-			exit(1)
-		}
+		println('url не указан')
+		exit(1)
+		// if 'm' in parameter.options && parameter.options['m'] != '' {
+		// 	url = parameter.options['m']
+		// }else {
+		// 	println('url не указан')
+		// 	exit(1)
+		// }
 	}
 	size := get_file_size(http.head(url)?)
 	number_of_threads := parameter.options['x'].int()
@@ -67,34 +69,32 @@ fn main() {
 	}else if 'output' in parameter.options {
 		file_name = parameter.options['output']
 	}
-	/*-----------------------------------------*/
 	println('file size ${util.bytes_to_mb(size)} bytes')
-	if 'm' !in parameter.options {
-		if size > 1000000000 {
-			println('Файл слишком большой')
-			exit(1)
-		}
+	// if 'm' !in parameter.options {
+	// 	if size > 3000000000 {
+	// 		println('Файл слишком большой')
+	// 		exit(1)
+	// 	}
+	// }
+	os.create(file_name) or {
+		println(err)
+		return
 	}
 	mut threads := []thread {}
-	one_size := util.size_for_one(size, number_of_threads)
-	go status_go(file_name, number_of_threads)
+	one_size := util.size_and_interval_calculate(size, number_of_threads)
+	go status_go(file_name, number_of_threads * 5)
 	for n, inter in one_size {
-		threads << go download_stream(n, inter, url, times)
+		threads << go download_stream(n, inter, one_size[1],
+									  url, times, file_name)
 	}
 	threads.wait()
 	indecator = true
-	mut file := os.create(file_name) or {
-        println(err)
-        return
-    }
-	for number in 0..number_of_threads {
-		for x in result_data {
-			if x.num == number {
-				file.write(x.data) or { println(err) }
-			}
-		}
-	}
-	file.close()
+	// for number in 0..number_of_threads {
+	// 	for x in result_data {
+	// 		if x.num == number {	
+	// 		}
+	// 	}
+	// }
 	end := int(time.ticks() - start) / 1000
 	speed := util.avg_speed_calculate(end, size)
 	println('average download speed $speed')
@@ -127,37 +127,51 @@ fn resp(url string, interval string) []byte {
 	return ''.bytes() // не получилось скачать
 }
 
-fn download_stream(num int, interval string, url string, times int) {
+fn download_stream(stream_num int, interval_start int, size int,
+				   url string, times int, file_name string) {
 	/* Скачисает свою часть файла и записывает в переменную (result_data) */
-	// 10 попыток скачать
+	// 100 попыток скачать
+	mut main_stream := false
 	mut data := []byte {}
-	for _ in 0..times {
-		data = resp(url, interval)
-		if data.len != 0 {
-			break
+	// mut file := os.open_file
+	for interval in util.stream_size_for_one(size, interval_start) {
+		for _ in 0..times {
+		data << resp(url, interval)
+		if how.len != 0 && how[how.len-1] == 'end' {
+			if how[0].int() - 1 == stream_num {
+				how.clear()
+				how << '$stream_num'
+				main_stream = true
+			}
 		}
+		if main_stream {
+			mut file := os.open_append(file_name) or {
+				println(err)
+				return
+			}
+			file.write(data) or {println(err)}
+			file.close()
+			data = []byte
+		}
+		if data.len != 0 { break }
 		time.sleep(util.sec_to_nanosec(0.2)) // 0.2 секунда
 	}
-	if data.len == 0 {
-		// если не получилось
-		println('failed to get data from server in thread $num')
-		exit(1)
+	sattt << 1
 	}
-	result_data << Data_struct{num, data}
-	sattt << 1 // bar.increment()
 }
 
 fn status_go(file_name string, max int) {
-	/* если в списке sattt поевляется что-то bar добовляет один и удаяет первый элемент */
+	/* если в списке sattt поевляется что-то 
+	bar добовляет один и удаяет первый элемент */
 	mut bar := progressbar.Progressbar{}
-	bar.new_with_format(file_name+'     ', u64(max), [`[`, `#`, `]`])
+	bar.new_with_format(file_name, u64(max), [`[`, `#`, `]`])
 	for true {
 		if sattt.len > 0 {
 			bar.increment()
 			sattt.pop()
 		}
 		if indecator { break }
-		time.sleep(1000000) // 1ms
+		time.sleep(100000000) // 1ms 
 	}
 	bar.finish()
 }
