@@ -14,6 +14,12 @@ import config
 import util
 import progressbar
 
+// struct Data_result {
+// 	num int
+// 	data []byte
+// }
+// type res_data = Data_result
+
 __global (
 	sattt = []int {}
 	indecator = false
@@ -41,7 +47,6 @@ fn main() {
 	}
 	// проверка наличия url'а
 	mut url := parameter.unknown[0] // 'http://212.183.159.230/10MB.zip'
-	// если url'а нету то «поискать» его в параметре «m»
 	if url == '' {
 		println('url не указан')
 		exit(1)
@@ -56,10 +61,10 @@ fn main() {
 		file_name = parameter.options['output']
 	}
 	println('file size ${util.bytes_to_mb(size)} bytes')
-	// os.create(file_name) or {
-	// 	println(err)
-	// 	return
-	// }
+	os.create(file_name) or {
+		println(err)
+		return
+	}
 	mut threads := []thread {}
 	one_size := util.size_and_interval_calculate(size, number_of_threads)
 	mut chunk := 1024*1024
@@ -106,55 +111,32 @@ fn resp(url string, interval string) []byte {
 fn download_stream(stream_num int, interval_start int, size int,
 				   url string, times int, file_name string) {
 	/* Скачисает свою часть файла и записывает в переменную (result_data) */
-	// 100 попыток скачать
-// 	mut main_stream := false
-// 	mut data := []byte{}
-// 	for interval in util.stream_size_for_one(size, interval_start) {
-// 		for _ in 0..times {
-// 			data << resp(url, interval)
-// 			println(how)
-// 			if how.len != 0 && how.last() == 'end' && !main_stream {
-// 				if stream_num + how[0].int() == 0 {
-// 					how.clear()
-// 					how << '$stream_num'
-// 					main_stream = true
-// 				}
-				
-// 			}
-// 			if main_stream && data.len != 0 {
-// 				// mut file := os.open_append(file_name) or {
-// 				// 	println(err)
-// 				// 	return
-// 				// }
-// 				println(stream_num)
-// 				// file.write(data) or {println(err)}
-// 				// file.close()
-// 				os.write_file_array(file_name, data) or {
-// 					println(err)
-// 					return 
-// 				}
-// 				data.clear()
-// 				break
-// 			}
-// 			if data.len != 0 { break }
-// 			time.sleep(util.sec_to_nanosec(0.2)) // 0.2 секунда
-// 		}
-// 		sattt << 1
-// 	}
-// 	if data.len != 0 && !main_stream {
-// 		for true {
-// 			if how.len != 0 && how.last() == 'end' {
-// 				if how[0].int() + 1 == stream_num {
-// 					how.clear()
-// 					how << '$stream_num'
-// 					os.write_file_array(file_name, data) or {println(err)}
-// 					break
-// 				}
-// 			}
-// 		}
-// 	}
-// }
-
+	
+	mut data := []byte{}
+	for interval in util.stream_size_for_one(size, interval_start) {
+		// 100 попыток скачать
+		for _ in 0..times {
+			data << resp(url, interval)
+			if data.len != 0 { break }
+		}
+		if how[0] == stream_num {
+			// os.write_file_array(file_name, data) or {println(err)}
+			util.file_writer(file_name, data)
+			data.clear()
+		}
+		sattt << 1 // знак status bar'у +1 (см.status_go)
+	}
+	if data.len != 0 {
+		for true {
+			if how[0] == stream_num {
+				util.file_writer(file_name, data)
+				data.clear()
+				how[0] = stream_num + 1
+				break
+			}
+			time.sleep(util.sec_to_nanosec(0.1)) // 100ms
+		}
+	}else { how[0] = stream_num + 1 }
 }
 
 fn status_go(file_name string, max int) {
@@ -174,3 +156,15 @@ fn status_go(file_name string, max int) {
 	}
 	bar.finish()
 }
+
+// fn stream_writer(number_of_threads int, file_name string) {
+// 	for num in 0..num_of_threads {
+// 		for true {
+// 			if data_result[0].num == num {
+// 				util.file_writer(file_name, data_result[0].data)
+// 				break
+// 			}
+// 		}
+		
+// 	}
+// }

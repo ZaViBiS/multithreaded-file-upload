@@ -51,7 +51,7 @@ const (
 	min_bar_width = 1
 	whitespace_length = 2
 	bar_border_width = 2
-	eta_format_length = 13
+	eta_format_length = 15
 )
 
 pub struct Progressbar {

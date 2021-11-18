@@ -73,7 +73,7 @@ pub fn stream_size_for_one(size int, interval_start int) []string {
 	mut start := 0
 	mut end := interval_start
 	mut result := []string {}
-	for x in 0..(size/chunk-1) {
+	for _ in 0..(size/chunk-1) {
 		start = end
 		end += chunk
 		result << bytes_construct(start, end-1)
@@ -107,4 +107,10 @@ pub fn size_and_interval_calculate(file_size int, thread_num int) []Sizze {
 
 fn bytes_construct(start int, end int) string {
 	return 'bytes=$start-$end'
+}
+
+pub fn file_writer(file_name string, data []byte) {
+	mut file := os.open_append(file_name) or {exit(1)}
+	file.write(data) or {println(err)}
+	file.close()
 }

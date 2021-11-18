@@ -1,15 +1,14 @@
+// b3215c06647bc550406a9c8ccc378756  5MB.zip
+// b3215c06647bc550406a9c8ccc378756
+// 
+
 import os
 import rand
 
 fn main() {
-	mut a := true
-	if !a {
-		println(1)
-	}
-	a = false
-	if !a {
-		println(2)
-	}
+	os.write_file_array('test.txt', 'test1'.bytes())?
+	os.write_file_array('test.txt', 'test2'.bytes())?
+
 }
 
 fn g(size int) []byte {
