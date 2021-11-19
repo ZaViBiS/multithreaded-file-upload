@@ -19,14 +19,13 @@ struct Data_struct {
 	num  int
 	data []byte
 }
-type ObjectSumType = Data_struct
+type Res_data = Data_struct
 
 __global (
-	result_data = []ObjectSumType {}
-	sattt = []int {}
+	result_data = []Res_data{}
+	sattt = []int{}
 	indecator = false
 )
-
 
 fn main() {
 	start := time.ticks()
@@ -64,32 +63,28 @@ fn main() {
 	}
 	/*-----------------------------------------*/
 	println('file size ${util.bytes_to_mb(size)} bytes')
-	if 'm' !in parameter.options {
-		if size > 1000000000 {
-			println('Файл слишком большой')
-			exit(1)
-		}
-	}
 	mut threads := []thread {}
 	one_size := util.size_for_one(size, number_of_threads)
 	go status_go(file_name, number_of_threads)
 	for n, inter in one_size {
 		threads << go download_stream(n, inter, url, times)
 	}
+	writer := go stream_writer(threads.len, file_name)
 	threads.wait()
+	writer.wait()
 	indecator = true
-	mut file := os.create(file_name) or {
-        println(err)
-        return
-    }
-	for number in 0..number_of_threads {
-		for x in result_data {
-			if x.num == number {
-				file.write(x.data) or { println(err) }
-			}
-		}
-	}
-	file.close()
+	// mut file := os.create(file_name) or {
+    //     println(err)
+    //     return
+    // }
+	// for number in 0..number_of_threads {
+	// 	for x in result_data {
+	// 		if x.num == number {
+	// 			file.write(x.data) or { println(err) }
+	// 		}
+	// 	}
+	// }
+	// file.close()
 	end := int(time.ticks() - start) / 1000
 	speed := util.avg_speed_calculate(end, size)
 	println('average download speed $speed')
@@ -100,8 +95,7 @@ fn get_file_size(data http.Response) int {
 	if http.status_from_int(data.status_code).is_success() {
 		return data.header.values(http.CommonHeader.content_length)[0].int()
 	}else {
-		println('failed to get data from server 
-				with status code [$data.status_code]')
+		println('failed to get data from server with status code [$data.status_code]')
 		exit(1)
 	}
 }
@@ -138,7 +132,7 @@ fn download_stream(num int, interval string, url string, times int) {
 		println('failed to get data from server in thread $num')
 		exit(1)
 	}
-	result_data << Data_struct{num, data}
+	result_data << Res_data{num, data}
 	sattt << 1 // bar.increment()
 }
 
@@ -155,4 +149,25 @@ fn status_go(file_name string, max int) {
 		time.sleep(1000000) // 1ms
 	}
 	bar.finish()
+}
+
+fn stream_writer(number_of_threads int, file_name string) {
+	mut file := os.create(file_name) or {exit(1)}
+	mut p := false
+	for number in 0..number_of_threads {
+		p = false
+		for true {
+			time.sleep(10000000)
+			for x in result_data {
+				if x.num == number {
+					file.write(x.data) or {println(err)}
+					result_data.delete(0)
+					p = true
+					break
+			}
+			}
+			if p { break }
+		}
+	}
+	file.close()
 }

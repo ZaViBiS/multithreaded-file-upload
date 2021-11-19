@@ -1,5 +1,7 @@
 module util
 
+import os
+
 pub fn avg_speed_calculate(time_sec int, size_bytes int) string {
 	/* Подсчёт скорости загрузки */
 	return bytes_to_mb(int(f32(size_bytes) / f32(time_sec))) + '/s'
@@ -38,28 +40,6 @@ pub fn get_file_name(url string) string {
 
 pub fn size_for_one(size int, num_of_th int) []string {
 	// Делет файл на части (НЕ ФАКТИЧЕСКИ) для потоков
-	// mut step := 0
-	// mut times := 0
-	// mut start := 0
-	// mut end := 0
-	// mut result := []string {}
-	// // если не нужно коректирующий поток
-	// if size % num_of_th == 0 {
-	// 	step = size / num_of_th
-	// 	times = num_of_th
-	// }else { // если нужен
-	// 	step = size / (num_of_th-1)
-	// 	times = (num_of_th-1)
-	// }
-	// for _ in 0..(times-1) {
-	// 	start = end
-	// 	end = start + step
-	// 	result << 'bytes=$start-${end-1}'
-	// }
-	// // коректирующий поток
-	// if times != num_of_th { result << 'bytes=$end-$size' }
-	// else { result << 'bytes=$end-${end+step}' }
-	// return result
 	mut start := 0
 	mut end := 0
 	mut result := []string {}
@@ -71,4 +51,17 @@ pub fn size_for_one(size int, num_of_th int) []string {
 	}
 	result << 'bytes=$end-'
 	return result
+}
+
+fn bytes_construct(start int, end int) string {
+	if end == 0 {
+		return 'bytes=$start-'
+	}
+	return 'bytes=$start-$end'
+}
+
+pub fn file_writer(file_name string, data []byte) {
+	mut file := os.open_append(file_name) or {exit(1)}
+	file.write(data) or {println(err)}
+	file.close()
 }
