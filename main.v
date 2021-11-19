@@ -14,14 +14,8 @@ import config
 import util
 import progressbar
 
-// struct Data_result {
-// 	num int
-// 	data []byte
-// }
-// type res_data = Data_result
-
 __global (
-	sattt = []int {}
+	sattt = []int{}
 	indecator = false
 	how = [0]
 )
@@ -74,8 +68,16 @@ fn main() {
 		threads << go download_stream(n, size_n_interval.interval, 
 									  size_n_interval.size,
 									  url, times, file_name)
+		threads.wait()
+		println(n)
+		// time.sleep(util.sec_to_nanosec(0.35))
 	}
 	threads.wait()
+	// for th in threads {
+	// 	th.wait()
+	// 	threads.delete(0)
+	// 	println(th)
+	// }
 	indecator = true
 	end := int(time.ticks() - start) / 1000
 	speed := util.avg_speed_calculate(end, size)
@@ -111,26 +113,30 @@ fn resp(url string, interval string) []byte {
 fn download_stream(stream_num int, interval_start int, size int,
 				   url string, times int, file_name string) {
 	/* Скачисает свою часть файла и записывает в переменную (result_data) */
-	
 	mut data := []byte{}
 	for interval in util.stream_size_for_one(size, interval_start) {
 		// 100 попыток скачать
 		for _ in 0..times {
-			data << resp(url, interval)
-			if data.len != 0 { break }
+			if how[0] == stream_num {
+				util.file_writer(file_name, resp(url, interval))
+				break
+			}else {
+				data << resp(url, interval)
+				if data.len != 0 { break }
+			}
 		}
-		if how[0] == stream_num {
-			// os.write_file_array(file_name, data) or {println(err)}
-			util.file_writer(file_name, data)
-			data.clear()
-		}
+		// if how[0] == stream_num {
+		// 	// os.write_file_array(file_name, data) or {println(err)}
+			
+		// 	data.clear()
+		// }
 		sattt << 1 // знак status bar'у +1 (см.status_go)
 	}
 	if data.len != 0 {
 		for true {
 			if how[0] == stream_num {
 				util.file_writer(file_name, data)
-				data.clear()
+				// data.clear()
 				how[0] = stream_num + 1
 				break
 			}
@@ -156,15 +162,3 @@ fn status_go(file_name string, max int) {
 	}
 	bar.finish()
 }
-
-// fn stream_writer(number_of_threads int, file_name string) {
-// 	for num in 0..num_of_threads {
-// 		for true {
-// 			if data_result[0].num == num {
-// 				util.file_writer(file_name, data_result[0].data)
-// 				break
-// 			}
-// 		}
-		
-// 	}
-// }
