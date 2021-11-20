@@ -36,3 +36,5 @@ test.v
 *.mp4
 *.zip
 linux_x86_64_ofile
+
+__pycache__/
