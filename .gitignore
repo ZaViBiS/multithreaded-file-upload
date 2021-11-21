@@ -37,4 +37,6 @@ test.v
 *.zip
 linux_x86_64_ofile
 
+# python
 __pycache__/
+log.log

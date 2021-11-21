@@ -50,7 +50,7 @@ def download_stream(num: int, heder: dict, previous_stream,
         except:
             logging.debug(num)
     if previous_stream == True:
-            file_write(data.content, FILE)
+        file_write(data.content, FILE)
     else:
         previous_stream.join()
         file_write(data.content, FILE)
@@ -58,3 +58,10 @@ def download_stream(num: int, heder: dict, previous_stream,
 
 def create_file(file_name: str) -> None:
     open(file_name, 'w').close()
+
+
+def find_out_the_size_by_headers(headers: dict) -> int:
+    data = headers['Range'][6:]
+    first = int(data[:data.index('-')])
+    last = int(data[data.index('-')+1:])
+    return last - first
