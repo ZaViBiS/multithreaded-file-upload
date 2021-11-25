@@ -12,10 +12,11 @@ logging.basicConfig(format='%(asctime)s %(message)s',
 
 parser = argparse.ArgumentParser(description='Great Description To Be Here')
 parser.add_argument('-x', type=int, action='store',
-                    dest='HTRE', help='Simple value', required=False)
-parser.add_argument('-u', action='store', dest='URL', help='URL')
+                    dest='HTRE', help='Количесто потоков загрузки', required=False)
+parser.add_argument('-u', action='store', dest='URL', help='url')
 parser.add_argument('-o', action='store', dest='FILE',
-                    help='output file name', required=False)
+                    help='Название файла (если не указать название будет получено из ссылки)'
+                    , required=False)
 args = parser.parse_args()
 
 REPEAT = 100
@@ -51,8 +52,6 @@ for header in fn.size_for_one(SIZE, HTRE):
     time.sleep(0.2)
     starting_bar.next()
 starting_bar.finish()
-# print(number_of_streams)
-print('stream is started')
 for thread in thread_list:
     thread.join()
     bar.next()
