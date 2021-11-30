@@ -15,8 +15,7 @@ parser.add_argument('-x', type=int, action='store',
                     dest='HTRE', help='Количесто потоков загрузки', required=False)
 parser.add_argument('-u', action='store', dest='URL', help='url')
 parser.add_argument('-o', action='store', dest='FILE',
-                    help='Название файла (если не указать название будет получено из ссылки)'
-                    , required=False)
+                    help='Название файла (если не указать название будет получено из ссылки)', required=False)
 args = parser.parse_args()
 
 REPEAT = 100
@@ -33,12 +32,13 @@ else:
     FILE = fn.file_name(URL)
 
 fn.create_file(FILE)
-
+ext install vlanguage.vscode-vlang
 starting_bar = Bar('stream stared', max=HTRE)
 bar = Bar('stream ended ', max=HTRE)
 previous_stream = True
 number_of_streams = 0
 thread_list = []
+wait = SIZE
 
 for header in fn.size_for_one(SIZE, HTRE):
     previous_stream = threading.Thread(target=fn.download_stream,
@@ -49,7 +49,8 @@ for header in fn.size_for_one(SIZE, HTRE):
     previous_stream.start()
     number_of_streams += 1
     thread_list.append(previous_stream)
-    time.sleep(0.2)
+    # Задержка между запуском потоков
+    time.sleep(fn.time_calculator(wait))
     starting_bar.next()
 starting_bar.finish()
 for thread in thread_list:

@@ -65,3 +65,7 @@ def find_out_the_size_by_headers(headers: dict) -> int:
     first = int(data[:data.index('-')])
     last = int(data[data.index('-')+1:])
     return last - first
+
+
+def time_calculator(wait: int) -> float:
+    return wait / 107374182.4
