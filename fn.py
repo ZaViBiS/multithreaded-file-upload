@@ -68,4 +68,4 @@ def find_out_the_size_by_headers(headers: dict) -> int:
 
 
 def time_calculator(wait: int) -> float:
-    return wait / 107374182.4
+    return wait / (107374182.4 * 4)

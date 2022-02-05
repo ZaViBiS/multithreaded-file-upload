@@ -32,7 +32,7 @@ else:
     FILE = fn.file_name(URL)
 
 fn.create_file(FILE)
-ext install vlanguage.vscode-vlang
+
 starting_bar = Bar('stream stared', max=HTRE)
 bar = Bar('stream ended ', max=HTRE)
 previous_stream = True
@@ -50,7 +50,8 @@ for header in fn.size_for_one(SIZE, HTRE):
     number_of_streams += 1
     thread_list.append(previous_stream)
     # Задержка между запуском потоков
-    time.sleep(fn.time_calculator(wait))
+    print(fn.time_calculator(wait))
+    # time.sleep(fn.time_calculator(wait))
     starting_bar.next()
 starting_bar.finish()
 for thread in thread_list:
